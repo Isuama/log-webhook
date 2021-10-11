@@ -1,13 +1,9 @@
-FROM golang:alpine as builder
+FROM golang:1.16 AS builder
+RUN mkdir /app
+ADD . /app
 WORKDIR /app
-COPY main.go ./
-RUN go mod download 
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o app ./...
 
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/main .
-COPY --from=builder /app/.env .       
-EXPOSE 8080
-CMD ["./main"]
+FROM alpine:latest AS production
+COPY --from=builder /app .
+CMD ["./app"] 
