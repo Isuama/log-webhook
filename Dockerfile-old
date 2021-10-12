@@ -1,0 +1,12 @@
+FROM golang:alpine AS build 
+RUN apk --no-cache add gcc g++ make ca-certificates
+WORKDIR /app
+COPY . .
+RUN apk update -qq && apk add git
+RUN go get github.com/oklog/ulid
+RUN go build .
+
+FROM golang:alpine
+WORKDIR /usr/bin
+COPY --from=build /app .
+CMD ["go run", "./app"]
